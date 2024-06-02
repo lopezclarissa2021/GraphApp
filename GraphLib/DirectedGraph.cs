@@ -1,27 +1,25 @@
-﻿using System.Runtime.CompilerServices;
-using System.Runtime.ExceptionServices;
-using System.Security.Cryptography.X509Certificates;
+﻿using System.Runtime.ExceptionServices;
 
 namespace GraphLib
 {
-
-
     public class DirectedGraph
     {
         public int NumVertices { get => Vertices.Count; }
         public List<Vertex> Vertices = new List<Vertex>();
+
         public Vertex AddVertex(string label)
         {
             Vertex v = new Vertex(label);
-            Vertices.Add(v);
-            return v;
 
+            Vertices.Add(v);
+
+            return v;
         }
 
-        public int?[,] CreateAdjMatrix()
+        public int[,] CreateAdjMatrix()
         {
-
-            int?[,] AdjMatrix = new int?[Vertices.Count, Vertices.Count];
+            // make a 2d array to represent all verticies
+            int[,] AdjMatrix = new int[Vertices.Count, Vertices.Count];
 
             for (int i = 0; i < Vertices.Count; i++)
             {
@@ -38,40 +36,35 @@ namespace GraphLib
                         AdjMatrix[i, j] = edge.Weight;
                     }
                 }
-
             }
+
             return AdjMatrix;
         }
 
-        public void PrintMatrix()
+        public int MinDistance(int[] dist, bool[] visits)
         {
-            var matrix = CreateAdjMatrix();
+            int min = int.MaxValue;
+            int min_index = -1;
 
-            Console.Write("\t");
+            for (int i = 0; i < Vertices.Count; i++)
             {
-                for (int i = 0; i < Vertices.Count; i++)
+                if (visits[i] == false && dist[i] <= min)
                 {
-                    Console.Write($"{Vertices[i].Label}");
+                    min = dist[i];
+                    min_index = i;
                 }
+            }
 
-                Console.WriteLine();
+            return min_index;
+        }
 
-                for (int i = 0; i < Vertices.Count; i++)
-                {
-                    Console.Write($"{Vertices[i].Label}\t");
-                    for (int j = 0; j < Vertices.Count; j++)
-                    {
-                        if (matrix[i, j] == null)
-                        {
-                            Console.Write($"[{matrix[i, j].ToString()}]");
-                        }
-                        else
-                        {
-                            Console.Write("[.]");
-                        }
-                    }
-                    Console.WriteLine();
-                }
+        public void PrintSolution(int[] dist, int n)
+        {
+            Console.Write("Vertex     Distance from Source\n");
+
+            for (int i = 0; i < Vertices.Count; i++)
+            {
+                Console.Write(Vertices[i].Label + " \t\t " + dist[i] + "\n");
             }
         }
 
@@ -86,59 +79,68 @@ namespace GraphLib
                 visits[i] = false;
             }
 
-
             dist[src] = 0;
 
             for (int count = 0; count < Vertices.Count - 1; count++)
             {
-
+                // pick min distance vertex from the set of vertices not yet processed
                 int u = MinDistance(dist, visits);
 
+                // mark the picked vertex as visited
                 visits[u] = true;
 
-
-
+                // update dist value of the adjacent vertices of the picked vertex
                 for (int v = 0; v < Vertices.Count; v++)
                 {
+                    /* update dist[v] only if:
+                        it is not visited,
+                        there is an edge for u to v,
+                        and the total weight of path from src to v through u is smaller than the current value of dist[v]
+                    */
 
                     if (!visits[v] &&
-                       graph[u, v] != 0 &
-                       dist[u] != int.MaxValue &
-                       dist[u] + graph[u, v] < dist[v]
-                       )
+                        graph[u, v] != 0 &&
+                        dist[u] != int.MaxValue &&
+                        dist[u] + graph[u, v] < dist[v])
                     {
                         dist[v] = dist[u] + graph[u, v];
                     }
                 }
             }
+
             PrintSolution(dist, Vertices.Count);
         }
 
-        private int MinDistance(int[] dist, bool[] visits)
-        {
-            throw new NotImplementedException();
-        }
 
-        private void PrintSolution(int[] dist, int count)
+        public void PrintMatrix()
         {
-            throw new NotImplementedException();
-        }
+            var matrix = CreateAdjMatrix();
 
-        private int MidDistance(int[] dist, bool[] visits)
-        {
-            int min = int.MaxValue;
-            int min_index = -1;
+            Console.Write("\t");
+            for (int i = 0; i < Vertices.Count; i++)
+            {
+                Console.Write($" {Vertices[i].Label} ");
+            }
+            Console.WriteLine();
 
 
             for (int i = 0; i < Vertices.Count; i++)
             {
-                if (visits[i] == false && dist[i] <= min)
+                Console.Write($"{Vertices[i].Label}\t");
+
+                for (int j = 0; j < Vertices.Count; j++)
                 {
-                    min = dist[i];
-                    min_index = i;
+                    if (matrix[i, j] != null)
+                    {
+                        Console.Write($"[{matrix[i, j].ToString()}]");
+                    }
+                    else
+                    {
+                        Console.Write("[.]");
+                    }
                 }
+                Console.WriteLine();
             }
-            return min_index;
         }
     }
 }

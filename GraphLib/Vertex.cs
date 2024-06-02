@@ -1,12 +1,14 @@
 ﻿namespace GraphLib
 {
-    public class Vertex(string lbl)
+    public class Vertex
     {
-        public string Label { get; set; } = lbl;
+        public string Label { get; set; }
+        public List<Edge> Edges = new List<Edge>();
 
-        private static readonly List<Edge> value = [];
-        public List<Edge> Edges = value;
-        private Edge edge;
+        public Vertex(string lbl)
+        {
+            Label = lbl;
+        }
 
         public Vertex AddEdge(Vertex child, int weight)
         {
@@ -17,16 +19,14 @@
                 Weight = weight
             });
 
-            Edges.Add(edge);
-
-            // do something here =
-            if (child.Edges.Exists(e => e.Parent == child && e.Child == this))
+            // do something here
+            if (!child.Edges.Exists(e => e.Parent == child && e.Child == this))
             {
-                //update here
+                // create here
                 child.AddEdge(this, weight);
             }
-            return this;
 
+            return this;
         }
     }
 }
